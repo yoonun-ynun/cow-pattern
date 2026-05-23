@@ -15,7 +15,7 @@ def _create_collection(db: pymongo.database.Database):
                     "required": ["id", "name", "vector"],
                     "properties": {
                         "id": {
-                            "bsonType": "int",
+                            "bsonType": ["int", "long"],
                             "description": "소 고유 ID"
                         },
                         "name": {
