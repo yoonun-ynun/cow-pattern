@@ -103,13 +103,12 @@ while(1) :
             userName = input("변경할 사용자 이름을 입력하세요 -> ")
             #ID, 벡터는 변경 X, 소유자 이름만 변경
             info.name = userName
+            if(db.update(cowId, info)) :
+                print("정보 변경이 완료되었습니다.")
+            else :
+                print("정보를 변경할 수 없습니다.")
         else :
             print("해당 ID의 소는 존재하지 않습니다.")
-
-        if(db.update(cowId, info)) :
-            print("정보 변경이 완료되었습니다.")
-        else :
-            print("정보를 변경할 수 없습니다.")
 
     elif(cmd == '4') : #정보삭제
         try :
