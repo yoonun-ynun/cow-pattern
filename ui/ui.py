@@ -98,8 +98,8 @@ while(1) :
             print("숫자만 입력해 주세요")
             continue
 
-        info = db.get_by_id(cowId) #info 가져옴
         if(info is not None) : # info가 있는지 확인
+            info = db.get_by_id(cowId) #info 가져옴
             userName = input("변경할 사용자 이름을 입력하세요 -> ")
             #ID, 벡터는 변경 X, 소유자 이름만 변경
             info.name = userName
