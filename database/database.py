@@ -43,7 +43,12 @@ class Database:
         self.db = self.client["cow_pattern"]
         _create_collection(self.db)
         self.collection = self.db["cows"]
-        self.collection.create_index("id", unique=True)
+        try:
+            self.collection.create_index("id", unique=True)
+        except PyMongoError as exc:
+            raise RuntimeError(
+                "Failed to initialize database index for cows.id"
+            ) from exc
 
     def create(self, info: Info) -> bool:
         """
