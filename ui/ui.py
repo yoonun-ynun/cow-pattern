@@ -52,7 +52,13 @@ while(1) :
         
         if(inpWay == 1) : #이미지 입력 동작
             file_path = inputImage()
-            vector = extra.feature(file_path)
+            if(file_path) : #사용자가 취소하여 경로가 없는지 확인
+                vector = extra.feature(file_path)
+            else : #없다면 처음으로 돌아감
+                print("취소되었습니다.")
+                print()
+                continue
+
             cowId = comp.check(vector) #해당 이미지의 소 ID 가져옴
 
             if(cowId != None) : 
