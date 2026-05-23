@@ -7,16 +7,20 @@ from tkinter import filedialog
 
 extra = Extraction()
 comp = Compare()
-info = Info()
 db = Database()
 
 idNum = 0
 
 def inputImage() : #tkinter로 이미지를 입력 받는다.
-    file_path = filedialog.askopenfilename(
-        title = "이미지 선택", 
-        filetypes=[("이미지 파일", "*.png; *.jpg; *jpeg")])
-    return file_path #이미지의 경로를 반환
+    root = tk.Tk()
+    root.withdraw()
+    try :
+        file_path = filedialog.askopenfilename(
+            title = "이미지 선택", 
+            filetypes=[("이미지 파일", "*.png; *.jpg; *.jpeg")])
+        return file_path #이미지의 경로를 반환
+    finally :
+        root.destroy()
 
 def printCowList(infoList) : #소 info 리스트를 받아 출력
     print("ID\t소유자")
@@ -28,20 +32,25 @@ while(1) :
             "(등록: 1, 조회: 2, 수정: 3, 삭제: 4, 종료: 5) -> "))
 
     if(cmd == 1) : #소 정보 등록
-        file_path = inputImage() #이미지 경로 가져옴
-        if(file_path) : #사용자가 취소하여 경로가 없는지 확인
-            vector = extra.feature(file_path) #이미지 벡터 값 가져옴
-        else : #없다면 처음으로 돌아감
-            print("취소되었습니다.")
-            print()
+        try :
+            file_path = inputImage() #이미지 경로 가져옴
+            if file_path == "" :
+                raise FileNotFoundError("선택이 취소되었습니다.")
+                #취소버튼을 누르거나 창을 닫을 시
+        except FileNotFoundError as e :
+            print(e)
+            print("선택이 취소되거나 이미지를 불러오지 못했습니다.")
             continue
 
+        vector = extra.feature(file_path) #이미지 벡터 값 가져옴
         if(comp.check(vector) == None) : #DB에 해당 벡터 값이 없다면 
             userName = input("소유자 이름을 입력하세요. -> ")
-            info.__init__(idNum, userName, vector)
+            info = Info(idNum, userName, vector) #info 객체 생성
             idNum += 1 # ID는 순차적으로 증가
-            db.create(info)
-            print("등록이 완료되었습니다.")
+            if(db.create(info)) :
+                print("등록이 완료되었습니다.")
+            else :
+                print("등록에 실패하였습니다.")
         else :
             print("이미 등록된 소 입니다.")
 
@@ -51,14 +60,16 @@ while(1) :
                             "소유자 이름으로 조회하기 : 2 -> "))
         
         if(inpWay == 1) : #이미지 입력 동작
-            file_path = inputImage()
-            if(file_path) : #사용자가 취소하여 경로가 없는지 확인
-                vector = extra.feature(file_path)
-            else : #없다면 처음으로 돌아감
-                print("취소되었습니다.")
-                print()
+            try :
+                file_path = inputImage() #이미지 경로 가져옴
+                if file_path == "" :
+                    raise FileNotFoundError("선택이 취소되었습니다.")
+            except FileNotFoundError as e :
+                print(e)
+                print("선택이 취소되거나 이미지를 불러오지 못했습니다.")
                 continue
 
+            vector = extra.feature(file_path)
             cowId = comp.check(vector) #해당 이미지의 소 ID 가져옴
 
             if(cowId != None) : 
@@ -71,18 +82,26 @@ while(1) :
         elif(inpWay == 2) : #소유자 이름 입력 동작
             userName = input("소유자 이름을 입력하세요. -> ")
             infoList = db.get_by_user(userName)
-            printCowList(infoList)
+            if(infoList != None) :
+                printCowList(infoList)
+            else :
+                print("소유하신 소가 없습니다.")
 
         else :
             print("올바른 입력 방법이 아닙니다.")
 
     elif(cmd == 3) : #정보 수정
-        cowId = input("갱신할 정보의 소 ID를 입력하세요. -> ")
-        preInfo = db.get_by_id(cowId) #변경하지 않을 값을 임시저장
+        try :
+             cowId = int(input("갱신할 정보의 소 ID를 입력하세요. -> "))
+        except ValueError as e:
+            print(e)
+            print("숫자만 입력해 주세요")
+            continue
 
+        info = db.get_by_id(cowId) #info 가져옴
         userName = input("변경할 사용자 이름을 입력하세요 -> ")
         #ID, 벡터는 변경 X, 소유자 이름만 변경
-        info.__init__(preInfo.id, userName, preInfo.vector)
+        info.name = userName
 
         if(db.update(cowId, info)) :
             print("정보 변경이 완료되었습니다.")
@@ -90,7 +109,12 @@ while(1) :
             print("정보를 변경할 수 없습니다.")
 
     elif(cmd == 4) : #정보삭제
-        cowId = input("삭제할 소의 ID를 입력하세요. -> ")
+        try :
+            cowId = int(input("삭제할 소의 ID를 입력하세요. -> "))
+        except ValueError :
+            print("숫자만 입력해 주세요")
+            continue
+
         if(db.delete(cowId)) :
             print("성공적으로 삭제 되었습니다.")
         else :
