@@ -38,8 +38,8 @@ def get_similarity_probability(vector1: list[float], vector2: list[float]) -> fl
     return round(probability, 2)
 
 class Compare:
-    def __init__(self):
-        self.db = Database()
+    def __init__(self, db=None):
+        self.db = db if db is not None else Database()
 
     def check(self, vector: list[float]) -> int | None:
         """
