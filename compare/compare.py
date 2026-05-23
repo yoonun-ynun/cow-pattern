@@ -10,11 +10,24 @@ def get_similarity_probability(vector1: list[float], vector2: list[float]) -> fl
     :param vector2: 두 번째 소의 특징 벡터
     :return: 0.0 ~ 100.0 사이의 일치 확률 (%)
     """
-    v1 = np.array(vector1)
-    v2 = np.array(vector2)
+    v1 = np.array(vector1, dtype=float)
+    v2 = np.array(vector2, dtype=float)
+
+    # 비교가 불가능한 입력은 일치하지 않는 것으로 간주합니다.
+    if v1.ndim != 1 or v2.ndim != 1:
+        return 0.0
+    if v1.size == 0 or v2.size == 0:
+        return 0.0
+    if v1.shape[0] != v2.shape[0]:
+        return 0.0
+    norm_v1 = np.linalg.norm(v1)
+    norm_v2 = np.linalg.norm(v2)
+    if norm_v1 <= 0.0 or norm_v2 <= 0.0:
+        return 0.0
+
 
     # 1. 코사인 유사도 계산 (결과는 -1.0 ~ 1.0)
-    cosine_sim = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    cosine_sim = np.dot(v1, v2) / (norm_v1 * norm_v2)
 
     # 2. 확률(%)로 변환
     # 유사도가 음수면 아예 패턴이 반대라는 뜻이므로 0%로 간주합니다.

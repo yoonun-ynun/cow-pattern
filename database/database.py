@@ -1,41 +1,40 @@
 import pymongo
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import PyMongoError, CollectionInvalid
 
 from .info import Info
 from pymongo import MongoClient
 
 
 def _create_collection(db: pymongo.database.Database):
-    if "cows" in db.list_collection_names():
-        return
-
-    collection = db.create_collection(
-        "cows",
-        validator={
-            "$jsonSchema": {
-                "bsonType": "object",
-                "required": ["id", "name", "vector"],
-                "properties": {
-                    "id": {
-                        "bsonType": "int",
-                        "description": "소 고유 ID"
-                    },
-                    "name": {
-                        "bsonType": "string",
-                        "description": "소유자 이름"
-                    },
-                    "vector": {
-                        "bsonType": "array",
-                        "items": {
-                            "bsonType": "double"
+    try:
+        db.create_collection(
+            "cows",
+            validator={
+                "$jsonSchema": {
+                    "bsonType": "object",
+                    "required": ["id", "name", "vector"],
+                    "properties": {
+                        "id": {
+                            "bsonType": "int",
+                            "description": "소 고유 ID"
                         },
-                        "description": "특징 벡터"
+                        "name": {
+                            "bsonType": "string",
+                            "description": "소유자 이름"
+                        },
+                        "vector": {
+                            "bsonType": "array",
+                            "items": {
+                                "bsonType": "double"
+                            },
+                            "description": "특징 벡터"
+                        }
                     }
                 }
             }
-        }
-    )
-    collection.create_index("id", unique=True)
+        )
+    except CollectionInvalid:
+        pass
 
 
 class Database:
@@ -44,6 +43,7 @@ class Database:
         self.db = self.client["cow_pattern"]
         _create_collection(self.db)
         self.collection = self.db["cows"]
+        self.collection.create_index("id", unique=True)
 
     def create(self, info: Info) -> bool:
         """
@@ -61,7 +61,7 @@ class Database:
             result = self.collection.insert_one(data)
             return result.acknowledged
         # id가 겹쳐서 DB 등록에 실패하였을 경우
-        except DuplicateKeyError:
+        except PyMongoError:
             return False
 
     def update(self, cow_id: int, info: Info) -> bool:
@@ -69,7 +69,7 @@ class Database:
         소의 고유id를 받아 해당 소에 대한 정보를 업데이트 합니다.
         :param cow_id: 소의 고유id 값입니다.
         :param info: 사용자에 대한 정보 클래스 입니다. Info 클래스로 정의되어 있습니다.
-        :return: 성공유부를 니다.
+        :return: 성공유부를 반환합니다.
         """
 
         result = self.collection.update_one(
@@ -86,7 +86,7 @@ class Database:
 
     def get_by_user(self, name: str) -> list[Info] | None:
         """
-        사용자 이름을 받아서 해당 사용자의 소유한 소의 정보를 반환하니다.
+        사용자 이름을 받아서 해당 사용자의 소유한 소의 정보를 반환합니다.
         소를 여러마리 소유하고 있을 수 있으므로 list로 반환합니다.
         :param name: 사용자의 이름입니다.
         :return: 소의 정보를 담은 Info 클래스에 대한 리스트 형식입니다. 없을 시 None을 반환합니다.
