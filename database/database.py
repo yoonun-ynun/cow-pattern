@@ -77,15 +77,19 @@ class Database:
         :return: 성공유부를 반환합니다.
         """
 
-        result = self.collection.update_one(
-            {"id": cow_id},
-            {
-                "$set": {
-                    "name": info.name,
-                    "vector": info.vector,
-                }
-            },
-        )
+        try:
+            result = self.collection.update_one(
+                {"id": cow_id},
+                {
+                    "$set": {
+                        "name": info.name,
+                        "vector": info.vector,
+                    }
+                },
+            )
+        except PyMongoError:
+            return False
+
         # 승인되었는지가 아닌 실제로 처리된 결과가 있는지 확인 필요
         return result.matched_count > 0
 
