@@ -74,8 +74,11 @@ while(1) :
 
             if(cowId is not None) : 
                 info = db.get_by_id(cowId) #ID로 소 info 가져옴
-                infoList = [info] #함수에 넣기 위해 리스트에 넣음
-                printCowList(infoList) #소 정보 출력
+                if(info is not None) :
+                    infoList = [info] #함수에 넣기 위해 리스트에 넣음
+                    printCowList(infoList) #소 정보 출력
+                else :
+                    print("해당 ID의 소 정보가 없습니다.")
             else :
                 print("등록되어 있지 않은 소입니다.")
 
