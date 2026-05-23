@@ -12,15 +12,15 @@ db = Database()
 idNum = 0
 
 def inputImage() : #tkinter로 이미지를 입력 받는다.
-    root = tk.Tk()
-    root.withdraw()
+    root = tk.Tk() #루트 창 생성
+    root.withdraw() #루트 창 숨기기
     try :
         file_path = filedialog.askopenfilename(
             title = "이미지 선택", 
             filetypes=[("이미지 파일", "*.png; *.jpg; *.jpeg")])
         return file_path #이미지의 경로를 반환
     finally :
-        root.destroy()
+        root.destroy() #창 제거
 
 def printCowList(infoList) : #소 info 리스트를 받아 출력
     print("ID\t소유자")
