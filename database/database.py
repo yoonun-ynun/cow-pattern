@@ -149,6 +149,7 @@ class Database:
         """
         result = self.collection.find_one(
             filter={"id": {"$exists": True}},
+            projection={"id": 1, "_id": 0},
             sort=[("id", pymongo.DESCENDING)]
         )
 
