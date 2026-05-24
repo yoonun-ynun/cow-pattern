@@ -141,3 +141,15 @@ class Database:
         vectors = [{"id": doc["id"], "vector": doc["vector"]} for doc in cursor]
 
         return vectors
+
+    def get_next_id(self) -> int:
+        """
+        다음으로 사용할 소 고유 ID를 가져옵니다.
+        :return: 다음으로 사용할 소 고유 ID
+        """
+        result = self.collection.find_one(
+            filter={"id": {"$exists": True}},
+            sort=[("id", pymongo.DESCENDING)]
+        )
+
+        return result["id"] + 1 if result else 1
