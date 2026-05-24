@@ -9,16 +9,22 @@ extra = Extraction()
 comp = Compare()
 db = Database()
 
-def inputImage() : #tkinter로 이미지를 입력 받는다.
-    root = tk.Tk() #루트 창 생성
-    root.withdraw() #루트 창 숨기기
-    try :
-        file_path = filedialog.askopenfilename(
-            title = "이미지 선택", 
-            filetypes=[("이미지 파일", "*.png; *.jpg; *.jpeg")])
-        return file_path #이미지의 경로를 반환
-    finally :
-        root.destroy() #창 제거
+def inputImage(root):
+    root.update_idletasks()
+    root.update()
+
+    file_path = filedialog.askopenfilename(
+        parent=root,
+        title="이미지 선택",
+        filetypes=[
+            ("이미지 파일", "*.png *.jpg *.jpeg")
+        ]
+    )
+
+    root.update_idletasks()
+    root.update()
+
+    return file_path
 
 def printCowList(infoList) : #소 info 리스트를 받아 출력
     print("ID\t소유자")
@@ -26,13 +32,15 @@ def printCowList(infoList) : #소 info 리스트를 받아 출력
         print(f"{info.id}\t{info.name}")
 
 def run() :
+    root = tk.Tk()
+    root.withdraw()
     while(1) :
         cmd = input("사용할 명령을 입력하세요.\n"
                 "(등록: 1, 조회: 2, 수정: 3, 삭제: 4, 종료: 5) -> ")
 
         if(cmd == '1') : #소 정보 등록
             try :
-                file_path = inputImage() #이미지 경로 가져옴
+                file_path = inputImage(root) #이미지 경로 가져옴
                 if file_path == "" :
                     raise FileNotFoundError("선택이 취소되었습니다.")
                     #취소버튼을 누르거나 창을 닫을 시
@@ -60,7 +68,7 @@ def run() :
         
             if(inpWay == '1') : #이미지 입력 동작
                 try :
-                    file_path = inputImage() #이미지 경로 가져옴
+                    file_path = inputImage(root) #이미지 경로 가져옴
                     if file_path == "" :
                         raise FileNotFoundError("선택이 취소되었습니다.")
                 except FileNotFoundError as e :
@@ -130,6 +138,8 @@ def run() :
         else :
             print("올바른 명령이 아닙니다.")
         print()
+
+    root.destroy()
             
             
             
