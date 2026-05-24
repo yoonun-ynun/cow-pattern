@@ -141,3 +141,17 @@ class Database:
         vectors = [{"id": doc["id"], "vector": doc["vector"]} for doc in cursor]
 
         return vectors
+
+    def get_next_id(self) -> int:
+        """
+        다음으로 사용할 소 고유 ID를 가져옵니다.
+        :return: 다음으로 사용할 소 고유 ID
+        """
+        result = self.db["counters"].find_one_and_update(
+            {"_id": "cow_id"},  # 카운터의 식별자
+            {"$inc": {"sequence_value": 1}},  # 값을 1 증가 ($inc)
+            upsert=True,  # 문서가 없으면 새로 생성 (초기화)
+            return_document=pymongo.ReturnDocument.AFTER,  # 증가된 후의 값을 반환
+            projection={"sequence_value": 1, "_id": 0},
+        )
+        return result["sequence_value"]

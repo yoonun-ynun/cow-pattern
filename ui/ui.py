@@ -9,8 +9,6 @@ extra = Extraction()
 comp = Compare()
 db = Database()
 
-idNum = 0
-
 def inputImage() : #tkinter로 이미지를 입력 받는다.
     root = tk.Tk() #루트 창 생성
     root.withdraw() #루트 창 숨기기
@@ -28,7 +26,6 @@ def printCowList(infoList) : #소 info 리스트를 받아 출력
         print(f"{info.id}\t{info.name}")
 
 def run() :
-    global idNum
     while(1) :
         cmd = input("사용할 명령을 입력하세요.\n"
                 "(등록: 1, 조회: 2, 수정: 3, 삭제: 4, 종료: 5) -> ")
@@ -47,8 +44,8 @@ def run() :
             vector = extra.feature(file_path) #이미지 벡터 값 가져옴
             if(comp.check(vector) is None) : #DB에 해당 벡터 값이 없다면
                 userName = input("소유자 이름을 입력하세요. -> ")
-                info = Info(idNum, userName, vector) #info 객체 생성
-                idNum += 1 # ID는 순차적으로 증가
+                id_num = db.get_next_id()
+                info = Info(id_num, userName, vector) #info 객체 생성
                 if(db.create(info)) :
                     print("등록이 완료되었습니다.")
                 else :
