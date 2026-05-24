@@ -147,9 +147,10 @@ class Database:
         다음으로 사용할 소 고유 ID를 가져옵니다.
         :return: 다음으로 사용할 소 고유 ID
         """
-        result = self.collection.find_one(
-            filter={"id": {"$exists": True}},
-            sort=[("id", pymongo.DESCENDING)]
+        result = self.db["counters"].find_one_and_update(
+            {"_id": "cow_id"},  # 카운터의 식별자
+            {"$inc": {"sequence_value": 1}},  # 값을 1 증가 ($inc)
+            upsert=True,  # 문서가 없으면 새로 생성 (초기화)
+            return_document=pymongo.ReturnDocument.AFTER  # 증가된 후의 값을 반환
         )
-
-        return result["id"] + 1 if result else 1
+        return result["sequence_value"]
