@@ -26,7 +26,10 @@ class Extraction:
         """
         img_bgr = cv2.imread(str(file_path))
         if img_bgr is None:
-            raise FileNotFoundError(f"⚠️ 이미지를 로드할 수 없습니다: {file_path}")
+            raise OSError(
+                f"⚠️ 이미지를 로드할 수 없습니다: {file_path} "
+                "(파일이 없거나, 형식이 지원되지 않거나, 손상되었거나, 권한 문제가 있을 수 있습니다)"
+            )
 
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
         pil_img = Image.fromarray(img_rgb)
